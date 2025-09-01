@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Past;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "members")
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
