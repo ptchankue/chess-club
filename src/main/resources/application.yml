@@ -1,2 +1,5 @@
 server:
   port: 8084
+
+  compression:
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/css
