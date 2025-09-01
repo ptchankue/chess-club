@@ -1,6 +1,10 @@
 package za.co.tangentsolutions.chessclub.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+
 import java.time.LocalDate;
 
 @Entity
@@ -10,6 +14,7 @@ public class Member {
     private Long id;
     
     @Column(nullable = false)
+    @NotBlank(message = "Name cannot be blank")
     private String name;
     
     @Column(nullable = false)
@@ -17,8 +22,9 @@ public class Member {
     
     @Column(nullable = false, unique = true)
     private String email;
-    
-    @Column(nullable = false)
+
+    @NotNull(message = "Birthday cannot be null")
+    @Past(message = "Birthday must be in the past")
     private LocalDate birthday;
     
     @Column(name = "games_played", nullable = false)
