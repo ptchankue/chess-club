@@ -1,9 +1,11 @@
 package za.co.tangentsolutions.chessclub.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
+import za.co.tangentsolutions.chessclub.validation.UniqueEmail;
 
 import java.time.LocalDate;
 
@@ -17,11 +19,14 @@ public class Member {
     @Column(nullable = false)
     @NotBlank(message = "Name cannot be blank")
     private String name;
-    
-    @Column(nullable = false)
+
+    @NotBlank(message = "Surname cannot be blank")
     private String surname;
     
     @Column(nullable = false, unique = true)
+    @Email(message = "Email must be valid")
+    @UniqueEmail
+    @NotBlank(message = "Email cannot be blank")
     private String email;
 
     @NotNull(message = "Birthday cannot be null")
