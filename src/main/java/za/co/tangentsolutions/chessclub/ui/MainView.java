@@ -158,7 +158,7 @@ public class MainView extends VerticalLayout {
         Dialog dialog = new Dialog();
         dialog.setWidth("800px");
 
-        Grid<Game> historyGrid = new Grid<>(Game.class);
+        Grid<Game> historyGrid = new Grid<>();
         historyGrid.setItems(memberService.getPlayerGameHistory(member.getId()));
 
         historyGrid.addColumn(game -> game.getPlayedAt().toString()).setHeader("Date");
