@@ -4,4 +4,7 @@ keep track of is the ranking of each member.
 
 ## Running the project
 
+
+`mvn vaadin:build-frontend`
+
 `mvn spring-boot:run`
