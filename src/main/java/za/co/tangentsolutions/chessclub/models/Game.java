@@ -2,6 +2,10 @@ package za.co.tangentsolutions.chessclub.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 
@@ -12,20 +16,25 @@ public class Game {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @NotNull(message = "Player 1 is required")
     @ManyToOne
     @JoinColumn(name = "player1_id", nullable = false)
     private Member player1;
     
+    @NotNull(message = "Player 2 is required")
     @ManyToOne
     @JoinColumn(name = "player2_id", nullable = false)
     private Member player2;
     
+    @Min(value = 0, message = "Player 1 score must be non-negative")
     @Column(name = "player1_score", nullable = false)
     private int player1Score;
     
+    @Min(value = 0, message = "Player 2 score must be non-negative")
     @Column(name = "player2_score", nullable = false)
     private int player2Score;
     
+    @NotNull(message = "Game date is required")
     @Column(nullable = false)
     private LocalDateTime playedAt;
     
@@ -103,4 +112,6 @@ public class Game {
         if (player2Score < player1Score) return player2;
         return null; // Draw
     }
+    
+
 }
