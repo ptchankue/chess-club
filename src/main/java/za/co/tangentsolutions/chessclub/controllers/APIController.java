@@ -1,45 +1,67 @@
 package za.co.tangentsolutions.chessclub.controllers;
 
+import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import za.co.tangentsolutions.chessclub.models.Game;
 import za.co.tangentsolutions.chessclub.models.Member;
-import za.co.tangentsolutions.chessclub.repositories.MemberRepository;
+import za.co.tangentsolutions.chessclub.services.MemberService;
+import za.co.tangentsolutions.chessclub.services.RankingService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
+@RequestMapping("/api")
 public class APIController {
-    private final MemberRepository memberRepository;
+
+    private final MemberService memberService;
+    private final RankingService rankingService;
 
     @Autowired
-    public APIController(MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
+    public APIController(MemberService memberService, RankingService rankingService) {
+        this.memberService = memberService;
+        this.rankingService = rankingService;
     }
 
     private static final Logger logger = LogManager.getLogger(APIController.class);
 
-    @GetMapping("/api/members")
+    @GetMapping("/members")
     public ResponseEntity<List<Member>> allMembers() {
         logger.info("Getting all club members");
-        List<Member> memberList = memberRepository.findAll();
+        List<Member> memberList = memberService.getAllMembers();
         return ResponseEntity.status(HttpStatus.OK).body(memberList);
     }
-    @PostMapping("/api/members")
-    public ResponseEntity<Map> addMember(RequestBody member) {
-        Map<String, String> resultMap = new HashMap<>();
+    @PostMapping("/members")
+    public ResponseEntity<Object> addMember(@Valid @RequestBody Member member) {
+
+        Member newMember = memberService.createMember(member);
         logger.info("creating member");
-        return ResponseEntity.status(HttpStatus.CREATED).body(resultMap);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newMember);
+    }
+
+
+    @GetMapping("/matches")
+    public ResponseEntity<List<Game>> allMatches() {
+        logger.info("Getting all club matches");
+        List<Game> matchesList = rankingService.allMatches();
+        return ResponseEntity.status(HttpStatus.OK).body(matchesList);
+    }
+
+    @PostMapping("/matches")
+    public ResponseEntity<Object> addGame(@Valid @RequestBody Game game) {
+
+        Game newGame = rankingService.recordMatch(
+                game.getPlayer1().getId(),
+                game.getPlayer2().getId(),
+                game.getPlayer1Score(),
+                game.getPlayer2Score()
+        );
+        logger.info("creating game");
+        return ResponseEntity.status(HttpStatus.CREATED).body(newGame);
     }
 
 }
