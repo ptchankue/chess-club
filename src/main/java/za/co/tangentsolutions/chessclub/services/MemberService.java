@@ -1,13 +1,17 @@
 package za.co.tangentsolutions.chessclub.services;
 
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import za.co.tangentsolutions.chessclub.controllers.APIController;
 import za.co.tangentsolutions.chessclub.models.Game;
 import za.co.tangentsolutions.chessclub.models.Member;
 import za.co.tangentsolutions.chessclub.repositories.MemberRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +29,7 @@ public class MemberService {
         this.rankingService = rankingService;
     }
 
+    private static final Logger logger = LogManager.getLogger(MemberService.class);
 
     public List<Member> getAllMembers() {
         return memberRepository.findAllByOrderByRankAsc();
@@ -40,7 +45,7 @@ public class MemberService {
         Integer maxRank = memberRepository.findMaxRank();
         int newRank = (maxRank != null) ? maxRank + 1 : 1;
         member.setRank(newRank);
-
+        logger.info("Member to save: {}", member);
         return memberRepository.save(member);
     }
 

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import za.co.tangentsolutions.chessclub.validation.UniqueEmail;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
 
@@ -31,6 +32,7 @@ public class Member {
 
     @NotNull(message = "Birthday cannot be null")
     @Past(message = "Birthday must be in the past")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
     
     @Column(name = "games_played", nullable = false)
@@ -76,16 +78,4 @@ public class Member {
         return name + " " + surname;
     }
 
-    @Override
-    public String toString() {
-        return "Member{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
-                ", email='" + email + '\'' +
-                ", birthday=" + birthday +
-                ", gamesPlayed=" + gamesPlayed +
-                ", rank=" + rank +
-                '}';
-    }
 }
