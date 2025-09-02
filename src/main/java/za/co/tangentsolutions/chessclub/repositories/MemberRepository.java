@@ -25,4 +25,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Modifying
     @Query("UPDATE Member m SET m.rank = m.rank - 1 WHERE m.rank > :startRank AND m.rank <= :endRank")
     void decrementRanks(@Param("startRank") int startRank, @Param("endRank") int endRank);
+
+    boolean existsByEmail(String email);
 }
