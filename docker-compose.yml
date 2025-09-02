@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  chessclub-app:
+    build: .
+    container_name: chessclub-app
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:chessclub;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=
+      - SPRING_H2_CONSOLE_ENABLED=true
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
+      - SPRING_JPA_SHOW_SQL=true
+      - LOGGING_LEVEL_ZA_CO_TANGENTSOLUTIONS_CHESSCLUB=DEBUG
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - chessclub-db
+    networks:
+      - chessclub-network
+    restart: unless-stopped
+
+  chessclub-db:
+    image: postgres:15-alpine
+    container_name: chessclub-db
+    environment:
+      - POSTGRES_DB=chessclub
+      - POSTGRES_USER=chessclub
+      - POSTGRES_PASSWORD=chessclub123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - chessclub-network
+    restart: unless-stopped
+
+  # Optional: Redis for caching (if needed later)
+  # chessclub-redis:
+  #   image: redis:7-alpine
+  #   container_name: chessclub-redis
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - chessclub-network
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  chessclub-network:
+    driver: bridge

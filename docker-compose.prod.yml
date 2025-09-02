@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  chessclub-app:
+    build: .
+    container_name: chessclub-app-prod
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://chessclub-db:5432/chessclub
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_DATASOURCE_USERNAME=chessclub
+      - SPRING_DATASOURCE_PASSWORD=chessclub123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - SPRING_JPA_SHOW_SQL=false
+      - LOGGING_LEVEL_ZA_CO_TANGENTSOLUTIONS_CHESSCLUB=INFO
+      - JAVA_OPTS=-Xms1g -Xmx2g -XX:+UseG1GC -XX:+UseContainerSupport
+    volumes:
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+    depends_on:
+      - chessclub-db
+    networks:
+      - chessclub-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  chessclub-db:
+    image: postgres:15-alpine
+    container_name: chessclub-db-prod
+    environment:
+      - POSTGRES_DB=chessclub
+      - POSTGRES_USER=chessclub
+      - POSTGRES_PASSWORD=chessclub123
+    ports:
+      - "127.0.0.1:5432:5432"  # Only accessible from localhost
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db-backups:/backups
+    networks:
+      - chessclub-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  chessclub-network:
+    driver: bridge
