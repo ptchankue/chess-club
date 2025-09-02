@@ -1,4 +1,4 @@
-package za.co.chessclub.services;
+package za.co.tangentsolutions.chessclub.services;
 
 
 import org.junit.jupiter.api.BeforeEach;
