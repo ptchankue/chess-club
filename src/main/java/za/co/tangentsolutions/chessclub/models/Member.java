@@ -75,4 +75,17 @@ public class Member {
     public String getFullName() {
         return name + " " + surname;
     }
+
+    @Override
+    public String toString() {
+        return "Member{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", email='" + email + '\'' +
+                ", birthday=" + birthday +
+                ", gamesPlayed=" + gamesPlayed +
+                ", rank=" + rank +
+                '}';
+    }
 }

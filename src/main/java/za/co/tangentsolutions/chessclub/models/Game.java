@@ -14,20 +14,16 @@ public class Game {
     
     @ManyToOne
     @JoinColumn(name = "player1_id", nullable = false)
-    @NotBlank(message = "Player 1 cannot be blank")
     private Member player1;
     
     @ManyToOne
     @JoinColumn(name = "player2_id", nullable = false)
-    @NotBlank(message = "Player 2 cannot be blank")
     private Member player2;
     
     @Column(name = "player1_score", nullable = false)
-    @NotBlank(message = "Score 1 cannot be blank")
     private int player1Score;
     
     @Column(name = "player2_score", nullable = false)
-    @NotBlank(message = "Score 2 cannot be blank")
     private int player2Score;
     
     @Column(nullable = false)
