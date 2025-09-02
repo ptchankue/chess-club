@@ -35,7 +35,7 @@ public class MainView extends VerticalLayout {
     private final RankingService rankingService;
 
     private Grid<Member> membersGrid = new Grid<>(Member.class);
-    private Grid<Game> gamesGrid = new Grid<>(Game.class);
+    private Grid<Game> gamesGrid = new Grid<>();
     private VerticalLayout contentLayout = new VerticalLayout();
 
     private static final Logger logger = LogManager.getLogger(MainView.class);
@@ -93,11 +93,15 @@ public class MainView extends VerticalLayout {
     }
 
     private void configureGamesGrid() {
+        logger.info("Configuring games grid");
+        // Clear any existing columns to ensure custom configuration
+        gamesGrid.removeAllColumns();
+        
         gamesGrid.addColumn(game -> game.getPlayedAt().toString()).setHeader("Date");
         gamesGrid.addColumn(game -> game.getPlayer1().getFullName()).setHeader("Player 1");
-        gamesGrid.addColumn(game -> game.getPlayer1Score()).setHeader("Score");
+        gamesGrid.addColumn(game -> game.getPlayer1Score()).setHeader("P1 Score");
         gamesGrid.addColumn(game -> game.getPlayer2().getFullName()).setHeader("Player 2");
-        gamesGrid.addColumn(game -> game.getPlayer2Score()).setHeader("Score");
+        gamesGrid.addColumn(game -> game.getPlayer2Score()).setHeader("P2 Score");
         gamesGrid.addColumn(game -> {
             if (game.isDraw()) return "Draw";
             Member winner = game.getWinner();
@@ -109,6 +113,7 @@ public class MainView extends VerticalLayout {
                 .setHeader("P2 Rank Change");
 
         gamesGrid.getColumns().forEach(col -> col.setAutoWidth(true));
+        logger.info("Games grid configured with {} columns", gamesGrid.getColumns().size());
     }
 
     private void showMembersView() {
@@ -118,9 +123,11 @@ public class MainView extends VerticalLayout {
     }
 
     private void showGamesView() {
+        logger.info("Showing games view");
         contentLayout.removeAll();
         refreshGamesGrid();
         contentLayout.add(gamesGrid);
+        logger.info("Games grid added to content layout");
     }
 
     private void refreshAll() {
@@ -135,7 +142,15 @@ public class MainView extends VerticalLayout {
     }
 
     private void refreshGamesGrid() {
+        logger.info("Refreshing games grid");
         List<Game> games = rankingService.getGameHistory();
+        logger.info("Found {} games", games.size());
+        if (!games.isEmpty()) {
+            Game firstGame = games.get(0);
+            logger.info("First game - Player1: {}, Player2: {}", 
+                firstGame.getPlayer1() != null ? firstGame.getPlayer1().getFullName() : "null",
+                firstGame.getPlayer2() != null ? firstGame.getPlayer2().getFullName() : "null");
+        }
         gamesGrid.setItems(games);
     }
 
