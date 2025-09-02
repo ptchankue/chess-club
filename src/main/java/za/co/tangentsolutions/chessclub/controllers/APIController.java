@@ -53,15 +53,20 @@ public class APIController {
 
     @PostMapping("/matches")
     public ResponseEntity<Object> addGame(@Valid @RequestBody Game game) {
-
-        Game newGame = rankingService.recordMatch(
-                game.getPlayer1().getId(),
-                game.getPlayer2().getId(),
-                game.getPlayer1Score(),
-                game.getPlayer2Score()
-        );
-        logger.info("creating game");
-        return ResponseEntity.status(HttpStatus.CREATED).body(newGame);
+        try {
+            Game newGame = rankingService.recordMatch(
+                    game.getPlayer1().getId(),
+                    game.getPlayer2().getId(),
+                    game.getPlayer1Score(),
+                    game.getPlayer2Score()
+            );
+            logger.info("creating game");
+            return ResponseEntity.status(HttpStatus.CREATED).body(newGame);
+        } catch (Exception e) {
+            logger.error("Error creating game: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error creating game: " + e.getMessage());
+        }
     }
 
 }

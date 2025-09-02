@@ -18,6 +18,8 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import za.co.tangentsolutions.chessclub.models.Game;
 import za.co.tangentsolutions.chessclub.models.Member;
@@ -35,6 +37,8 @@ public class MainView extends VerticalLayout {
     private Grid<Member> membersGrid = new Grid<>(Member.class);
     private Grid<Game> gamesGrid = new Grid<>(Game.class);
     private VerticalLayout contentLayout = new VerticalLayout();
+
+    private static final Logger logger = LogManager.getLogger(MainView.class);
 
     @Autowired
     public MainView(MemberService memberService, RankingService rankingService) {
@@ -96,7 +100,8 @@ public class MainView extends VerticalLayout {
         gamesGrid.addColumn(game -> game.getPlayer2Score()).setHeader("Score");
         gamesGrid.addColumn(game -> {
             if (game.isDraw()) return "Draw";
-            return game.getWinner().getFullName() + " wins";
+            Member winner = game.getWinner();
+            return winner != null ? winner.getFullName() + " wins" : "Unknown";
         }).setHeader("Result");
         gamesGrid.addColumn(game -> game.getPlayer1RankBefore() + " → " + game.getPlayer1RankAfter())
                 .setHeader("P1 Rank Change");
@@ -124,6 +129,7 @@ public class MainView extends VerticalLayout {
     }
 
     private void refreshMembersGrid() {
+        logger.info("Refreshing members grid");
         List<Member> members = memberService.getAllMembers();
         membersGrid.setItems(members);
     }
@@ -149,8 +155,19 @@ public class MainView extends VerticalLayout {
             if (game.getPlayer1().equals(member)) return game.getPlayer1Score() + " - " + game.getPlayer2Score();
             return game.getPlayer2Score() + " - " + game.getPlayer1Score();
         }).setHeader("Score");
-        historyGrid.addColumn(game -> game.getPlayer1RankBefore() + " → " + game.getPlayer1RankAfter())
-                .setHeader("Rank Change");
+        historyGrid.addColumn(game -> {
+            if (game.getPlayer1().equals(member)) {
+                return game.getPlayer1RankBefore() + " → " + game.getPlayer1RankAfter();
+            } else {
+                return game.getPlayer2RankBefore() + " → " + game.getPlayer2RankAfter();
+            }
+        }).setHeader("Rank Change");
+        historyGrid.addColumn(game -> {
+            if (game.isDraw()) return "Draw";
+            Member winner = game.getWinner();
+            if (winner != null && winner.equals(member)) return "Won";
+            return "Lost";
+        }).setHeader("Result");
 
         dialog.add(new H3("Match History: " + member.getFullName()), historyGrid);
         dialog.open();
@@ -287,11 +304,16 @@ public class MainView extends VerticalLayout {
                     return;
                 }
 
-//                rankingService.processMatch(player1.getId(), player2.getId(), player1Score, player2Score);
-
-                refreshGrid();
-                dialog.close();
-                Notification.show("Match recorded successfully!", 3000, Notification.Position.MIDDLE);
+                // Record the match and update rankings
+                Game recordedGame = rankingService.recordMatch(player1.getId(), player2.getId(), player1Score, player2Score);
+                
+                if (recordedGame != null && recordedGame.getId() != null) {
+                    refreshAll(); // Refresh both members and games grids
+                    dialog.close();
+                    Notification.show("Match recorded successfully! Rankings updated.", 3000, Notification.Position.MIDDLE);
+                } else {
+                    Notification.show("Failed to record match. Please try again.", 5000, Notification.Position.MIDDLE);
+                }
             } catch (NumberFormatException ex) {
                 Notification.show("Please enter valid numeric scores", 3000, Notification.Position.MIDDLE);
             } catch (Exception ex) {
