@@ -15,8 +15,6 @@ import java.util.List;
 public class RankingService {
     
     private final MemberRepository memberRepository;
-    
-
     private final GameRepository gameRepository;
 
     @Autowired
@@ -82,7 +80,6 @@ public class RankingService {
             if (winner.equals(lowerRanked)) {
                 handleLowerRankedWin(higherRanked, lowerRanked);
             }
-            // Higher ranked wins - no changes needed
         }
     }
     
