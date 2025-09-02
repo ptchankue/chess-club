@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.helger.commons.mock.CommonsAssert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -76,6 +78,44 @@ public class MemberServiceTest {
         assertTrue(result.isPresent());
         assertEquals("John", result.get().getName());
         verify(memberRepository).findById(1L);
+    }
+
+    @Test
+    void getMemberById_WhenMemberNotExists_ShouldReturnEmpty() {
+        when(memberRepository.findById(999L)).thenReturn(Optional.empty());
+
+        Optional<Member> result = memberService.getMemberById(999L);
+
+        assertFalse(result.isPresent());
+        verify(memberRepository).findById(999L);
+    }
+
+    @Test
+    void createMember_WhenNoExistingMembers_ShouldSetRankToOne() {
+        Member newMember = new Member("New", "Member", "new@email.com",
+                LocalDate.of(2000, 1, 1), 0);
+        when(memberRepository.findMaxRank()).thenReturn(null);
+        when(memberRepository.save(any(Member.class))).thenReturn(newMember);
+
+        Member result = memberService.createMember(newMember);
+
+        assertEquals(1, result.getRank());
+        verify(memberRepository).findMaxRank();
+        verify(memberRepository).save(newMember);
+    }
+
+    @Test
+    void createMember_WithExistingMembers_ShouldSetRankToLast() {
+        Member newMember = new Member("New", "Member", "new@email.com",
+                LocalDate.of(2000, 1, 1), 0);
+        when(memberRepository.findMaxRank()).thenReturn(5);
+        when(memberRepository.save(any(Member.class))).thenReturn(newMember);
+
+        Member result = memberService.createMember(newMember);
+
+        assertEquals(6, result.getRank());
+        verify(memberRepository).findMaxRank();
+        verify(memberRepository).save(newMember);
     }
 
 }
