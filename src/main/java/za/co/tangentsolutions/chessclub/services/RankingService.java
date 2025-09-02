@@ -1,6 +1,8 @@
 package za.co.tangentsolutions.chessclub.services;
 
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +10,7 @@ import za.co.tangentsolutions.chessclub.models.Game;
 import za.co.tangentsolutions.chessclub.models.Member;
 import za.co.tangentsolutions.chessclub.repositories.GameRepository;
 import za.co.tangentsolutions.chessclub.repositories.MemberRepository;
+import za.co.tangentsolutions.chessclub.ui.MainView;
 
 import java.util.List;
 
@@ -16,6 +19,8 @@ public class RankingService {
     
     private final MemberRepository memberRepository;
     private final GameRepository gameRepository;
+
+    private static final Logger logger = LogManager.getLogger(RankingService.class);
 
     @Autowired
     public RankingService(MemberRepository memberRepository, GameRepository gameRepository) {
@@ -61,6 +66,10 @@ public class RankingService {
         Member player1 = game.getPlayer1();
         Member player2 = game.getPlayer2();
         
+        logger.info("Player1: {} (rank {}), Player2: {} (rank {})", 
+            player1.getFullName(), player1.getRank(), 
+            player2.getFullName(), player2.getRank());
+        
         // Determine higher and lower ranked players
         Member higherRanked, lowerRanked;
         if (player1.getRank() < player2.getRank()) {
@@ -71,14 +80,26 @@ public class RankingService {
             lowerRanked = player1;
         }
         
+        logger.info("Higher ranked: {} (rank {}), Lower ranked: {} (rank {})", 
+            higherRanked.getFullName(), higherRanked.getRank(), 
+            lowerRanked.getFullName(), lowerRanked.getRank());
+        
         if (game.isDraw()) {
+            logger.info("Game is a draw");
             handleDraw(higherRanked, lowerRanked);
         } else {
             Member winner = game.getWinner();
             Member loser = game.getLoser();
             
+            logger.info("Winner: {} (rank {}), Loser: {} (rank {})", 
+                winner.getFullName(), winner.getRank(), 
+                loser.getFullName(), loser.getRank());
+            
             if (winner.equals(lowerRanked)) {
+                logger.info("Lower ranked player won - processing upset");
                 handleLowerRankedWin(higherRanked, lowerRanked);
+            } else {
+                logger.info("Higher ranked player won - no ranking change");
             }
         }
     }
@@ -97,16 +118,26 @@ public class RankingService {
         int rankDifference = lowerRanked.getRank() - higherRanked.getRank();
         int moveUp = rankDifference / 2;
         
+        logger.info("Processing lower ranked win: {} (rank {}) beats {} (rank {}), difference={}, moveUp={}", 
+            lowerRanked.getFullName(), lowerRanked.getRank(), 
+            higherRanked.getFullName(), higherRanked.getRank(), rankDifference, moveUp);
+        
         if (moveUp > 0) {
             // Higher ranked moves down one position
             int newHigherRank = higherRanked.getRank() + 1;
+            logger.info("Upset: {} moves down from rank {} to {}", 
+                higherRanked.getFullName(), higherRanked.getRank(), newHigherRank);
             memberRepository.decrementRanks(higherRanked.getRank(), newHigherRank);
             higherRanked.setRank(newHigherRank);
             
             // Lower ranked moves up by half the difference
             int newLowerRank = lowerRanked.getRank() - moveUp;
+            logger.info("Upset: {} moves up from rank {} to {}", 
+                lowerRanked.getFullName(), lowerRanked.getRank(), newLowerRank);
             memberRepository.incrementRanks(newLowerRank, lowerRanked.getRank());
             lowerRanked.setRank(newLowerRank);
+        } else {
+            logger.info("Upset with small rank difference: no change");
         }
     }
     
