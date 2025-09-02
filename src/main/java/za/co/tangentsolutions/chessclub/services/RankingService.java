@@ -4,13 +4,12 @@ package za.co.tangentsolutions.chessclub.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import za.co.tangentsolutions.chessclub.models.Match;
+import za.co.tangentsolutions.chessclub.models.Game;
 import za.co.tangentsolutions.chessclub.models.Member;
-import za.co.tangentsolutions.chessclub.repositories.MatchRepository;
+import za.co.tangentsolutions.chessclub.repositories.GameRepository;
 import za.co.tangentsolutions.chessclub.repositories.MemberRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class RankingService {
@@ -18,16 +17,16 @@ public class RankingService {
     private final MemberRepository memberRepository;
     
 
-    private final MatchRepository matchRepository;
+    private final GameRepository gameRepository;
 
     @Autowired
-    public RankingService(MemberRepository memberRepository, MatchRepository matchRepository) {
+    public RankingService(MemberRepository memberRepository, GameRepository gameRepository) {
         this.memberRepository = memberRepository;
-        this.matchRepository = matchRepository;
+        this.gameRepository = gameRepository;
     }
 
     @Transactional
-    public Match recordMatch(Long player1Id, Long player2Id, int player1Score, int player2Score) {
+    public Game recordMatch(Long player1Id, Long player2Id, int player1Score, int player2Score) {
         Member player1 = memberRepository.findById(player1Id)
             .orElseThrow(() -> new RuntimeException("Player 1 not found"));
         Member player2 = memberRepository.findById(player2Id)
@@ -38,10 +37,10 @@ public class RankingService {
         }
         
         // Create game record
-        Match match = new Match(player1, player2, player1Score, player2Score);
+        Game game = new Game(player1, player2, player1Score, player2Score);
         
         // Process ranking changes
-        processRankingChanges(match);
+        processRankingChanges(game);
         
         // Update games played count
         player1.setGamesPlayed(player1.getGamesPlayed() + 1);
@@ -51,18 +50,18 @@ public class RankingService {
         memberRepository.save(player1);
         memberRepository.save(player2);
         
-        match.setPlayer1RankAfter(player1.getRank());
-        match.setPlayer2RankAfter(player2.getRank());
+        game.setPlayer1RankAfter(player1.getRank());
+        game.setPlayer2RankAfter(player2.getRank());
         
-        return matchRepository.save(match);
+        return gameRepository.save(game);
     }
 
-    public List<Match> allMatches(){
-        return matchRepository.findAll();
+    public List<Game> allMatches(){
+        return gameRepository.findAll();
     }
-    private void processRankingChanges(Match match) {
-        Member player1 = match.getPlayer1();
-        Member player2 = match.getPlayer2();
+    private void processRankingChanges(Game game) {
+        Member player1 = game.getPlayer1();
+        Member player2 = game.getPlayer2();
         
         // Determine higher and lower ranked players
         Member higherRanked, lowerRanked;
@@ -74,11 +73,11 @@ public class RankingService {
             lowerRanked = player1;
         }
         
-        if (match.isDraw()) {
+        if (game.isDraw()) {
             handleDraw(higherRanked, lowerRanked);
         } else {
-            Member winner = match.getWinner();
-            Member loser = match.getLoser();
+            Member winner = game.getWinner();
+            Member loser = game.getLoser();
             
             if (winner.equals(lowerRanked)) {
                 handleLowerRankedWin(higherRanked, lowerRanked);
@@ -114,11 +113,11 @@ public class RankingService {
         }
     }
     
-    public List<Match> getGameHistory() {
-        return matchRepository.findAllByOrderByPlayedAtDesc();
+    public List<Game> getGameHistory() {
+        return gameRepository.findAllByOrderByPlayedAtDesc();
     }
     
-    public List<Match> getPlayerGameHistory(Long playerId) {
-        return matchRepository.findMatchesByPlayerId(playerId);
+    public List<Game> getPlayerGameHistory(Long playerId) {
+        return gameRepository.findMatchesByPlayerId(playerId);
     }
 }

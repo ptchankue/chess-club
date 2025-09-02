@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "games")
-public class Match {
+public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -46,11 +46,11 @@ public class Match {
     private int player2RankAfter;
     
     // Constructors
-    public Match() {
+    public Game() {
         this.playedAt = LocalDateTime.now();
     }
     
-    public Match(Member player1, Member player2, int player1Score, int player2Score) {
+    public Game(Member player1, Member player2, int player1Score, int player2Score) {
         this();
         this.player1 = player1;
         this.player2 = player2;

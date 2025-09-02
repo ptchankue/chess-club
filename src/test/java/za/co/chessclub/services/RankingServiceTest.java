@@ -7,9 +7,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import za.co.tangentsolutions.chessclub.models.Match;
+import za.co.tangentsolutions.chessclub.models.Game;
 import za.co.tangentsolutions.chessclub.models.Member;
-import za.co.tangentsolutions.chessclub.repositories.MatchRepository;
+import za.co.tangentsolutions.chessclub.repositories.GameRepository;
 import za.co.tangentsolutions.chessclub.repositories.MemberRepository;
 import za.co.tangentsolutions.chessclub.services.RankingService;
 
@@ -29,14 +29,14 @@ class RankingServiceTest {
     private MemberRepository memberRepository;
     
     @Mock
-    private MatchRepository matchRepository;
+    private GameRepository gameRepository;
     
     @InjectMocks
     private RankingService rankingService;
     
     private Member higherRanked;
     private Member lowerRanked;
-    private Match testMatch;
+    private Game testGame;
     
     @BeforeEach
     void setUp() {
@@ -50,7 +50,7 @@ class RankingServiceTest {
         lowerRanked.setId(2L);
         lowerRanked.setGamesPlayed(8);
         
-        testMatch = new Match(higherRanked, lowerRanked, 1, 0);
+        testGame = new Game(higherRanked, lowerRanked, 1, 0);
     }
     
     @Test
@@ -58,10 +58,10 @@ class RankingServiceTest {
         // Arrange
         when(memberRepository.findById(1L)).thenReturn(Optional.of(higherRanked));
         when(memberRepository.findById(2L)).thenReturn(Optional.of(lowerRanked));
-        when(matchRepository.save(any(Match.class))).thenReturn(testMatch);
+        when(gameRepository.save(any(Game.class))).thenReturn(testGame);
         
         // Act
-        Match result = rankingService.recordMatch(1L, 2L, 1, 0);
+        Game result = rankingService.recordMatch(1L, 2L, 1, 0);
         
         // Assert
         assertEquals(3, higherRanked.getRank()); // No change
@@ -69,7 +69,7 @@ class RankingServiceTest {
         assertEquals(11, higherRanked.getGamesPlayed());
         assertEquals(9, lowerRanked.getGamesPlayed());
         verify(memberRepository, times(2)).save(any(Member.class));
-        verify(matchRepository).save(any(Match.class));
+        verify(gameRepository).save(any(Game.class));
     }
     
     @Test
@@ -77,11 +77,11 @@ class RankingServiceTest {
         // Arrange
         when(memberRepository.findById(1L)).thenReturn(Optional.of(higherRanked));
         when(memberRepository.findById(2L)).thenReturn(Optional.of(lowerRanked));
-        when(matchRepository.save(any(Match.class))).thenReturn(testMatch);
+        when(gameRepository.save(any(Game.class))).thenReturn(testGame);
         doNothing().when(memberRepository).incrementRanks(7, 8);
         
         // Act
-        Match result = rankingService.recordMatch(1L, 2L, 0, 0);
+        Game result = rankingService.recordMatch(1L, 2L, 0, 0);
         
         // Assert
         assertEquals(7, lowerRanked.getRank()); // Moved up one position
@@ -99,10 +99,10 @@ class RankingServiceTest {
         
         when(memberRepository.findById(1L)).thenReturn(Optional.of(higherRanked));
         when(memberRepository.findById(3L)).thenReturn(Optional.of(adjacentLower));
-        when(matchRepository.save(any(Match.class))).thenReturn(testMatch);
+        when(gameRepository.save(any(Game.class))).thenReturn(testGame);
         
         // Act
-        Match result = rankingService.recordMatch(1L, 3L, 0, 0);
+        Game result = rankingService.recordMatch(1L, 3L, 0, 0);
         
         // Assert
         assertEquals(3, higherRanked.getRank()); // No change
@@ -116,12 +116,12 @@ class RankingServiceTest {
         // Arrange - 5 rank difference (8-3), so lower should move up by 2 (5/2)
         when(memberRepository.findById(1L)).thenReturn(Optional.of(higherRanked));
         when(memberRepository.findById(2L)).thenReturn(Optional.of(lowerRanked));
-        when(matchRepository.save(any(Match.class))).thenReturn(testMatch);
+        when(gameRepository.save(any(Game.class))).thenReturn(testGame);
         doNothing().when(memberRepository).decrementRanks(3, 4);
         doNothing().when(memberRepository).incrementRanks(6, 8);
         
         // Act
-        Match result = rankingService.recordMatch(1L, 2L, 0, 1);
+        Game result = rankingService.recordMatch(1L, 2L, 0, 1);
         
         // Assert
         assertEquals(4, higherRanked.getRank()); // Moved down one position
@@ -140,10 +140,10 @@ class RankingServiceTest {
         
         when(memberRepository.findById(1L)).thenReturn(Optional.of(higherRanked));
         when(memberRepository.findById(3L)).thenReturn(Optional.of(adjacentLower));
-        when(matchRepository.save(any(Match.class))).thenReturn(testMatch);
+        when(gameRepository.save(any(Game.class))).thenReturn(testGame);
         
         // Act
-        Match result = rankingService.recordMatch(1L, 3L, 0, 1);
+        Game result = rankingService.recordMatch(1L, 3L, 0, 1);
         
         // Assert - difference = 1, so moveUp = 0 (no change)
         assertEquals(3, higherRanked.getRank()); // No change
@@ -161,7 +161,7 @@ class RankingServiceTest {
         });
         verify(memberRepository, never()).findById(any());
         verify(memberRepository, never()).save(any());
-        verify(matchRepository, never()).save(any());
+        verify(gameRepository, never()).save(any());
     }
     
     @Test
@@ -175,35 +175,35 @@ class RankingServiceTest {
         });
         verify(memberRepository).findById(1L);
         verify(memberRepository, never()).save(any());
-        verify(matchRepository, never()).save(any());
+        verify(gameRepository, never()).save(any());
     }
     
     @Test
     void getGameHistory_ShouldReturnAllGames() {
         // Arrange
-        List<Match> expectedMatches = Arrays.asList(testMatch);
-        when(matchRepository.findAllByOrderByPlayedAtDesc()).thenReturn(expectedMatches);
+        List<Game> expectedGames = Arrays.asList(testGame);
+        when(gameRepository.findAllByOrderByPlayedAtDesc()).thenReturn(expectedGames);
         
         // Act
-        List<Match> result = rankingService.getGameHistory();
+        List<Game> result = rankingService.getGameHistory();
         
         // Assert
         assertEquals(1, result.size());
-        verify(matchRepository).findAllByOrderByPlayedAtDesc();
+        verify(gameRepository).findAllByOrderByPlayedAtDesc();
     }
     
     @Test
     void getPlayerGameHistory_ShouldReturnPlayerGames() {
         // Arrange
-        List<Match> expectedMatches = Arrays.asList(testMatch);
-        when(matchRepository.findMatchesByPlayerId(1L)).thenReturn(expectedMatches);
+        List<Game> expectedGames = Arrays.asList(testGame);
+        when(gameRepository.findMatchesByPlayerId(1L)).thenReturn(expectedGames);
         
         // Act
-        List<Match> result = rankingService.getPlayerGameHistory(1L);
+        List<Game> result = rankingService.getPlayerGameHistory(1L);
         
         // Assert
         assertEquals(1, result.size());
-        verify(matchRepository).findMatchesByPlayerId(1L);
+        verify(gameRepository).findMatchesByPlayerId(1L);
     }
     
     @Test
@@ -211,14 +211,14 @@ class RankingServiceTest {
         // Arrange
         when(memberRepository.findById(1L)).thenReturn(Optional.of(higherRanked));
         when(memberRepository.findById(2L)).thenReturn(Optional.of(lowerRanked));
-        when(matchRepository.save(any(Match.class))).thenAnswer(invocation -> {
-            Match savedMatch = invocation.getArgument(0);
-            savedMatch.setId(1L);
-            return savedMatch;
+        when(gameRepository.save(any(Game.class))).thenAnswer(invocation -> {
+            Game savedGame = invocation.getArgument(0);
+            savedGame.setId(1L);
+            return savedGame;
         });
         
         // Act
-        Match result = rankingService.recordMatch(1L, 2L, 0, 1);
+        Game result = rankingService.recordMatch(1L, 2L, 0, 1);
         
         // Assert - Verify that rank after values are set correctly
         assertEquals(4, result.getPlayer1RankAfter()); // higher ranked moved down

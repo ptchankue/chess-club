@@ -4,7 +4,7 @@ package za.co.tangentsolutions.chessclub.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import za.co.tangentsolutions.chessclub.models.Match;
+import za.co.tangentsolutions.chessclub.models.Game;
 import za.co.tangentsolutions.chessclub.models.Member;
 import za.co.tangentsolutions.chessclub.repositories.MemberRepository;
 
@@ -70,7 +70,7 @@ public class MemberService {
         memberRepository.decrementRanks(deletedRank, Integer.MAX_VALUE);
     }
 
-    public List<Match> getPlayerGameHistory(Long memberId) {
+    public List<Game> getPlayerGameHistory(Long memberId) {
         return rankingService.getPlayerGameHistory(memberId);
     }
 }
