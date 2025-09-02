@@ -132,7 +132,7 @@ class RankingServiceTest {
     }
 
     @Test
-    void recordMatch_WhenLowerRankedWinsWithSmallDifference_ShouldNotChangeRanks() {
+    void recordMatch_WhenLowerRankedWinsWithSmallDifference_ShouldChangeRanks() {
         // Arrange - adjacent ranks (difference = 1)
         Member adjacentLower = new Member("Adjacent", "Player", "adjacent@email.com",
                                         LocalDate.of(1990, 8, 22), 4);
@@ -145,11 +145,11 @@ class RankingServiceTest {
         // Act
         Game result = rankingService.recordMatch(1L, 3L, 0, 1);
 
-        // Assert - difference = 1, so moveUp = 0 (no change)
-        assertEquals(3, higherRanked.getRank()); // No change
-        assertEquals(4, adjacentLower.getRank()); // No change
-        verify(memberRepository, never()).decrementRanks(anyInt(), anyInt());
-        verify(memberRepository, never()).incrementRanks(anyInt(), anyInt());
+        // Assert - difference = 1, so both players should change ranks
+        assertEquals(4, higherRanked.getRank()); // Moved down from 3 to 4
+        assertEquals(3, adjacentLower.getRank()); // Moved up from 4 to 3
+        verify(memberRepository).decrementRanks(3, 4); // higher ranked moved down
+        verify(memberRepository).incrementRanks(3, 4); // lower ranked moved up
         verify(memberRepository, times(2)).save(any(Member.class));
     }
 

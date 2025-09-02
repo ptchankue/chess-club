@@ -63,6 +63,8 @@ public class RankingService {
         return gameRepository.findAll();
     }
     private void processRankingChanges(Game game) {
+        logger.info("Processing ranking for game: {}", game);
+        
         Member player1 = game.getPlayer1();
         Member player2 = game.getPlayer2();
         
@@ -116,13 +118,13 @@ public class RankingService {
     
     private void handleLowerRankedWin(Member higherRanked, Member lowerRanked) {
         int rankDifference = lowerRanked.getRank() - higherRanked.getRank();
-        int moveUp = rankDifference / 2;
         
-        logger.info("Processing lower ranked win: {} (rank {}) beats {} (rank {}), difference={}, moveUp={}", 
+        logger.info("Processing lower ranked win: {} (rank {}) beats {} (rank {}), difference={}", 
             lowerRanked.getFullName(), lowerRanked.getRank(), 
-            higherRanked.getFullName(), higherRanked.getRank(), rankDifference, moveUp);
+            higherRanked.getFullName(), higherRanked.getRank(), rankDifference);
         
-        if (moveUp > 0) {
+        // For ANY upset, the higher ranked player should move down
+        if (rankDifference >= 1) {
             // Higher ranked moves down one position
             int newHigherRank = higherRanked.getRank() + 1;
             logger.info("Upset: {} moves down from rank {} to {}", 
@@ -130,14 +132,15 @@ public class RankingService {
             memberRepository.decrementRanks(higherRanked.getRank(), newHigherRank);
             higherRanked.setRank(newHigherRank);
             
-            // Lower ranked moves up by half the difference
+            // Lower ranked moves up by at least 1 position, or more for larger differences
+            int moveUp = Math.max(1, rankDifference / 2);
             int newLowerRank = lowerRanked.getRank() - moveUp;
             logger.info("Upset: {} moves up from rank {} to {}", 
                 lowerRanked.getFullName(), lowerRanked.getRank(), newLowerRank);
             memberRepository.incrementRanks(newLowerRank, lowerRanked.getRank());
             lowerRanked.setRank(newLowerRank);
         } else {
-            logger.info("Upset with small rank difference: no change");
+            logger.info("Upset with no rank difference: no change");
         }
     }
     
