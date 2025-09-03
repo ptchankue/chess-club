@@ -15,6 +15,7 @@ import za.co.tangentsolutions.chessclub.services.RankingService;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -58,7 +59,7 @@ class APIControllerTest {
 
     @Test
     void getAllMembers_ShouldReturnMembersList() throws Exception {
-        when(memberService.getAllMembers()).thenReturn(Arrays.asList(testMember));
+        when(memberService.getAllMembers()).thenReturn(Collections.singletonList(testMember));
 
         mockMvc.perform(get("/api/members"))
                 .andExpect(status().isOk())
@@ -199,7 +200,7 @@ class APIControllerTest {
 
     @Test
     void getAllGames_ShouldReturnGamesList() throws Exception {
-        when(rankingService.allMatches()).thenReturn(Arrays.asList(testGame));
+        when(rankingService.allMatches()).thenReturn(Collections.singletonList(testGame));
 
         mockMvc.perform(get("/api/matches"))
                 .andExpect(status().isOk())
@@ -209,7 +210,7 @@ class APIControllerTest {
 
     @Test
     void getPlayerGameHistory_WhenPlayerExists_ShouldReturnGames() throws Exception {
-        when(rankingService.getPlayerGameHistory(1L)).thenReturn(Arrays.asList(testGame));
+        when(rankingService.getPlayerGameHistory(1L)).thenReturn(Collections.singletonList(testGame));
 
         mockMvc.perform(get("/api/matches/player/1"))
                 .andExpect(status().isOk())

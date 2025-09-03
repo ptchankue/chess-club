@@ -15,6 +15,7 @@ import za.co.tangentsolutions.chessclub.services.RankingService;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -181,7 +182,7 @@ class RankingServiceTest {
     @Test
     void getGameHistory_ShouldReturnAllGames() {
         // Arrange
-        List<Game> expectedGames = Arrays.asList(testGame);
+        List<Game> expectedGames = Collections.singletonList(testGame);
         when(gameRepository.findAllByOrderByPlayedAtDesc()).thenReturn(expectedGames);
 
         // Act
@@ -195,7 +196,7 @@ class RankingServiceTest {
     @Test
     void getPlayerGameHistory_ShouldReturnPlayerGames() {
         // Arrange
-        List<Game> expectedGames = Arrays.asList(testGame);
+        List<Game> expectedGames = Collections.singletonList(testGame);
         when(gameRepository.findMatchesByPlayerId(1L)).thenReturn(expectedGames);
 
         // Act

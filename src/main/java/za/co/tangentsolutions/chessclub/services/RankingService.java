@@ -10,7 +10,6 @@ import za.co.tangentsolutions.chessclub.models.Game;
 import za.co.tangentsolutions.chessclub.models.Member;
 import za.co.tangentsolutions.chessclub.repositories.GameRepository;
 import za.co.tangentsolutions.chessclub.repositories.MemberRepository;
-import za.co.tangentsolutions.chessclub.ui.MainView;
 
 import java.util.List;
 

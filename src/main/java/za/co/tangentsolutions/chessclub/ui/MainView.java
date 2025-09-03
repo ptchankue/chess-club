@@ -34,9 +34,9 @@ public class MainView extends VerticalLayout {
     private final MemberService memberService;
     private final RankingService rankingService;
 
-    private Grid<Member> membersGrid = new Grid<>(Member.class);
-    private Grid<Game> gamesGrid = new Grid<>();
-    private VerticalLayout contentLayout = new VerticalLayout();
+    private final Grid<Member> membersGrid = new Grid<>(Member.class);
+    private final Grid<Game> gamesGrid = new Grid<>();
+    private final VerticalLayout contentLayout = new VerticalLayout();
 
     private static final Logger logger = LogManager.getLogger(MainView.class);
 

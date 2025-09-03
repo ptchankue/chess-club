@@ -6,12 +6,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import za.co.tangentsolutions.chessclub.controllers.APIController;
 import za.co.tangentsolutions.chessclub.models.Game;
 import za.co.tangentsolutions.chessclub.models.Member;
 import za.co.tangentsolutions.chessclub.repositories.MemberRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
